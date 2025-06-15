@@ -3,14 +3,14 @@ import { useState } from "react";
 import { User } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
-import MyAccountModal from "./MyAccountModal";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export const ProfileDropdown = () => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
-  const [accountOpen, setAccountOpen] = useState(false);
+  const navigate = useNavigate();
 
   if (!user) return null;
 
@@ -20,25 +20,27 @@ export const ProfileDropdown = () => {
     else toast({ title: "Signed out", variant: "default" });
   };
 
+  const goToAccount = () => {
+    setOpen(false);
+    navigate("/account");
+  };
+
   return (
-    <>
-      <DropdownMenu onOpenChange={setOpen} open={open}>
-        <DropdownMenuTrigger asChild>
-          <button className="rounded-full border border-gray-200 p-2 hover:bg-gray-100 transition">
-            <User className="w-6 h-6 text-gray-700" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem onClick={() => setAccountOpen(true)}>
-            My Account
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onSignOut}>
-            Sign out
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <MyAccountModal open={accountOpen} onOpenChange={setAccountOpen} />
-    </>
+    <DropdownMenu onOpenChange={setOpen} open={open}>
+      <DropdownMenuTrigger asChild>
+        <button className="rounded-full border border-gray-200 p-2 hover:bg-gray-100 transition">
+          <User className="w-6 h-6 text-gray-700" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem onClick={goToAccount}>
+          My Account
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={onSignOut}>
+          Sign out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
