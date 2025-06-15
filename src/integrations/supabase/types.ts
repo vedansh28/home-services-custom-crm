@@ -9,6 +9,80 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      clients: {
+        Row: {
+          address: string | null
+          billing_term: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          name: string
+          owner_id: string | null
+          phone: string | null
+        }
+        Insert: {
+          address?: string | null
+          billing_term?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          owner_id?: string | null
+          phone?: string | null
+        }
+        Update: {
+          address?: string | null
+          billing_term?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          owner_id?: string | null
+          phone?: string | null
+        }
+        Relationships: []
+      }
+      leads: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          id: string
+          last_contact: string | null
+          notes: string | null
+          service_type: string
+          stage: string
+          value: number | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          id?: string
+          last_contact?: string | null
+          notes?: string | null
+          service_type: string
+          stage: string
+          value?: number | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          id?: string
+          last_contact?: string | null
+          notes?: string | null
+          service_type?: string
+          stage?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -35,6 +109,44 @@ export type Database = {
           username?: string | null
         }
         Relationships: []
+      }
+      service_records: {
+        Row: {
+          amount: number
+          client_id: string
+          created_at: string | null
+          date: string
+          id: string
+          status: string
+          type: string
+        }
+        Insert: {
+          amount: number
+          client_id: string
+          created_at?: string | null
+          date: string
+          id?: string
+          status: string
+          type: string
+        }
+        Update: {
+          amount?: number
+          client_id?: string
+          created_at?: string | null
+          date?: string
+          id?: string
+          status?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_records_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

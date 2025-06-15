@@ -1,9 +1,9 @@
 
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { KanbanColumn } from "./KanbanColumn";
 import { KanbanCard } from "./KanbanCard";
+import { useLeads } from "@/hooks/useLeads";
 
 export type KanbanStage = 
   | "new-lead" 
@@ -20,16 +20,17 @@ export type ServiceType = "window-washing" | "pressure-washing" | "holiday-light
 
 export interface Lead {
   id: string;
-  clientName: string;
-  serviceType: ServiceType;
+  client_id: string;
+  service_type: string;
   value: number;
   stage: KanbanStage;
-  lastContact: string;
+  last_contact: string;
   notes?: string;
 }
 
 export const Kanban = () => {
   const [serviceFilter, setServiceFilter] = useState<ServiceType>("all");
+  const { data: leads = [], isLoading } = useLeads();
 
   const stages: { id: KanbanStage; title: string; color: string }[] = [
     { id: "new-lead", title: "New Lead", color: "bg-gray-100" },
@@ -43,53 +44,10 @@ export const Kanban = () => {
     { id: "lost", title: "Lost", color: "bg-red-100" },
   ];
 
-  // Sample data - in a real app, this would come from your database
-  const [leads] = useState<Lead[]>([
-    {
-      id: "1",
-      clientName: "John Smith",
-      serviceType: "window-washing",
-      value: 250,
-      stage: "new-lead",
-      lastContact: "2024-01-15",
-    },
-    {
-      id: "2",
-      clientName: "Sarah Johnson",
-      serviceType: "holiday-lights",
-      value: 800,
-      stage: "contacted",
-      lastContact: "2024-01-14",
-    },
-    {
-      id: "3",
-      clientName: "Mike Wilson",
-      serviceType: "pressure-washing",
-      value: 400,
-      stage: "quote-sent",
-      lastContact: "2024-01-13",
-    },
-    {
-      id: "4",
-      clientName: "Lisa Brown",
-      serviceType: "window-washing",
-      value: 300,
-      stage: "service-booked",
-      lastContact: "2024-01-12",
-    },
-    {
-      id: "5",
-      clientName: "David Davis",
-      serviceType: "gutter-cleaning",
-      value: 150,
-      stage: "completed",
-      lastContact: "2024-01-11",
-    },
-  ]);
-
-  const filteredLeads = serviceFilter === "all" 
-    ? leads 
-    : leads.filter(lead => lead.serviceType === serviceFilter);
+  // Convert to ServiceType
+  const filteredLeads = serviceFilter === "all"
+    ? leads
+    : leads.filter(lead => lead.service_type === serviceFilter);
 
   const getLeadsForStage = (stage: KanbanStage) => {
     return filteredLeads.filter(lead => lead.stage === stage);
@@ -115,7 +73,6 @@ export const Kanban = () => {
           </Select>
         </div>
       </div>
-
       <div className="overflow-x-auto">
         <div className="flex space-x-4 min-w-max pb-4">
           {stages.map((stage) => (
@@ -132,6 +89,9 @@ export const Kanban = () => {
           ))}
         </div>
       </div>
+      {isLoading && (
+        <div className="text-center text-gray-400 py-8">Loading leads…</div>
+      )}
     </div>
   );
 };
