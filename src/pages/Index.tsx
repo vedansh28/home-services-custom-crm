@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { DashboardMetrics } from "@/components/dashboard/DashboardMetrics";
 import { DashboardCharts } from "@/components/dashboard/DashboardCharts";
@@ -7,11 +6,18 @@ import { Kanban } from "@/components/kanban/Kanban";
 import { ClientManagement } from "@/components/clients/ClientManagement";
 import { ServiceScheduling } from "@/components/scheduling/ServiceScheduling";
 import { PaymentIntegration } from "@/components/payments/PaymentIntegration";
+import AuthPage from "@/components/layout/AuthPage";
+import { HeaderBar } from "@/components/layout/HeaderBar";
+import { useAuth } from "@/hooks/useAuth";
 
 type TabType = "dashboard" | "kanban" | "clients" | "scheduling" | "payments";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) return <div className="text-center pt-10 text-gray-400">Loading...</div>;
+  if (!user) return <AuthPage />;
 
   const renderContent = () => {
     switch (activeTab) {
@@ -42,6 +48,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <HeaderBar />
       <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
       <main className="container mx-auto px-4 py-6">
         <div className="mb-6">
