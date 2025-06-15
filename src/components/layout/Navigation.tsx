@@ -2,18 +2,20 @@
 import { cn } from "@/lib/utils";
 import { BarChart, Users, Calendar, CreditCard, KanbanSquare } from "lucide-react";
 
+type TabType = "dashboard" | "kanban" | "clients" | "scheduling" | "payments";
+
 interface NavigationProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+  activeTab: TabType;
+  setActiveTab: (tab: TabType) => void;
 }
 
 export const Navigation = ({ activeTab, setActiveTab }: NavigationProps) => {
   const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: BarChart },
-    { id: "kanban", label: "Pipeline", icon: KanbanSquare },
-    { id: "clients", label: "Clients", icon: Users },
-    { id: "scheduling", label: "Scheduling", icon: Calendar },
-    { id: "payments", label: "Payments", icon: CreditCard },
+    { id: "dashboard" as TabType, label: "Dashboard", icon: BarChart },
+    { id: "kanban" as TabType, label: "Pipeline", icon: KanbanSquare },
+    { id: "clients" as TabType, label: "Clients", icon: Users },
+    { id: "scheduling" as TabType, label: "Scheduling", icon: Calendar },
+    { id: "payments" as TabType, label: "Payments", icon: CreditCard },
   ];
 
   return (
