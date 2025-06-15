@@ -1,4 +1,3 @@
-
 import { User, Settings, Mail } from "lucide-react";
 
 interface SidebarProps {
@@ -9,17 +8,15 @@ interface SidebarProps {
 
 const nav = [
   { id: "profile", label: "Profile Details", icon: User },
-  { id: "settings", label: "Settings", icon: Settings },
-  { id: "invitations", label: "Invite User", icon: Mail, admin: true },
+  { id: "settings", label: "Settings", icon: Settings }
 ];
 
-export default function AccountSidebar({ activeSection, onSelectSection, showInvitations }: SidebarProps) {
+export default function AccountSidebar({ activeSection, onSelectSection }: SidebarProps) {
   return (
     <aside className="min-w-[220px] bg-white shadow-md h-screen p-6 flex flex-col gap-3 border-r border-gray-100">
       <div className="text-2xl font-semibold mb-8">My Account</div>
       <nav className="flex-1 flex flex-col gap-2">
         {nav.map(item => {
-          if (item.admin && !showInvitations) return null;
           const Icon = item.icon;
           return (
             <button
