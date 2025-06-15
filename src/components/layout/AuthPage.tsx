@@ -9,7 +9,6 @@ import { toast } from "@/hooks/use-toast";
 
 const AuthPage = () => {
   const { user, isLoading } = useAuth();
-  const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
   const navigate = useNavigate();
@@ -23,26 +22,11 @@ const AuthPage = () => {
   const onSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
-    if (isLogin) {
-      const { error } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
-      if (error) {
-        toast({ title: "Login failed", description: error.message, variant: "destructive" });
-      } else {
-        toast({ title: "Welcome!" });
-      }
+    const { error } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
+    if (error) {
+      toast({ title: "Login failed", description: error.message, variant: "destructive" });
     } else {
-      // Always use correct redirect URL!
-      const redirectUrl = `${window.location.origin}/`;
-      const { error } = await supabase.auth.signUp({
-        email: form.email,
-        password: form.password,
-        options: { emailRedirectTo: redirectUrl },
-      });
-      if (error) {
-        toast({ title: "Sign up failed", description: error.message, variant: "destructive" });
-      } else {
-        toast({ title: "Check your email to confirm sign up." });
-      }
+      toast({ title: "Welcome!" });
     }
     setLoading(false);
   };
@@ -52,7 +36,7 @@ const AuthPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="bg-white rounded shadow-md p-8 w-full max-w-sm space-y-6">
-        <h2 className="text-2xl font-bold text-center">{isLogin ? "Login" : "Sign Up"}</h2>
+        <h2 className="text-2xl font-bold text-center">Login</h2>
         <form className="space-y-4" onSubmit={onSubmit}>
           <div>
             <label className="block text-sm font-semibold">Email</label>
@@ -71,35 +55,19 @@ const AuthPage = () => {
               type="password"
               value={form.password}
               onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-              autoComplete={isLogin ? "current-password" : "new-password"}
+              autoComplete="current-password"
               required
               placeholder="********"
             />
           </div>
           <Button className="w-full" type="submit" disabled={loading}>
-            {loading ? "..." : isLogin ? "Login" : "Sign Up"}
+            {loading ? "..." : "Login"}
           </Button>
         </form>
-        <div className="text-center text-sm">
-          {isLogin ? (
-            <>
-              New here?{" "}
-              <button className="underline text-blue-600" onClick={() => setIsLogin(false)}>
-                Sign up
-              </button>
-            </>
-          ) : (
-            <>
-              Have an account?{" "}
-              <button className="underline text-blue-600" onClick={() => setIsLogin(true)}>
-                Login
-              </button>
-            </>
-          )}
-        </div>
       </div>
     </div>
   );
 };
 
 export default AuthPage;
+
