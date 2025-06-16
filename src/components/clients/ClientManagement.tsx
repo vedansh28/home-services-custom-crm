@@ -1,11 +1,15 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Phone, Mail, Calendar } from "lucide-react";
+import { Plus, Search, Phone, Mail, Calendar, Trash2 } from "lucide-react";
 import { useClients } from "@/hooks/useClients";
 import { useServiceRecords } from "@/hooks/useServiceRecords";
+import { AddClientModal } from "./AddClientModal";
+import { ClientDetailsModal } from "./ClientDetailsModal";
+import { DeleteClientModal } from "./DeleteClientModal";
 
 interface Client {
   id: string;
@@ -29,6 +33,10 @@ interface ServiceRecord {
 
 export const ClientManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<any>(null);
   const { data: clients = [], isLoading } = useClients();
 
   const filteredClients = clients.filter((client: any) =>
@@ -49,15 +57,36 @@ export const ClientManagement = () => {
     }
   };
 
+  const handleViewDetails = (client: any) => {
+    setSelectedClient(client);
+    setShowDetailsModal(true);
+  };
+
+  const handleScheduleInvoice = (client: any) => {
+    // TODO: Implement schedule invoice functionality
+    console.log("Schedule invoice for:", client.name);
+  };
+
+  const handleDeleteClient = (client: any) => {
+    setSelectedClient(client);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    // TODO: Implement actual deletion
+    console.log("Deleting client:", selectedClient.name);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-800">Client Management</h2>
-        <Button className="bg-blue-600 hover:bg-blue-700">
+        <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setShowAddModal(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Add New Client
         </Button>
       </div>
+      
       <Card className="p-4 bg-white shadow-sm">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -69,20 +98,21 @@ export const ClientManagement = () => {
           />
         </div>
       </Card>
+
       {isLoading && (
         <div className="text-center text-gray-400 py-8">Loading clients…</div>
       )}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <div className="space-y-4">
         {filteredClients.map((client: any) => {
-          // Service records
-          // To keep this performant, show up to 2 most recent by default
           const { data: serviceHistory = [] } = useServiceRecords(client.id);
           const totalValue = serviceHistory.reduce((sum: number, sr: any) => sum + (sr.amount || 0), 0);
+          const lastService = serviceHistory[0]; // Most recent service
 
           return (
             <Card key={client.id} className="p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
-              <div className="space-y-4">
-                <div className="flex items-start justify-between">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-4">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">{client.name}</h3>
                     <p className="text-sm text-gray-600">{client.address}</p>
@@ -91,20 +121,11 @@ export const ClientManagement = () => {
                     {client.billing_term || "—"}
                   </Badge>
                 </div>
-                <div className="flex items-center space-x-4 text-sm text-gray-600">
-                  <div className="flex items-center">
-                    <Mail className="h-4 w-4 mr-1" />
-                    {client.email}
+                <div className="text-right">
+                  <div className="font-semibold text-green-600">
+                    Total Value: ${totalValue}
                   </div>
-                  <div className="flex items-center">
-                    <Phone className="h-4 w-4 mr-1" />
-                    {client.phone}
-                  </div>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center text-gray-600">
-                    <Calendar className="h-4 w-4 mr-1" />
-                    {/* Next service is just most recent future/scheduled */}
+                  <div className="text-sm text-gray-600">
                     Next Service: {
                       serviceHistory.find((s: any) =>
                         new Date(s.date) >= new Date() && s.status === "scheduled"
@@ -115,35 +136,77 @@ export const ClientManagement = () => {
                         : "—"
                     }
                   </div>
-                  <div className="font-semibold text-green-600">
-                    Total Value: ${totalValue}
-                  </div>
                 </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Recent Services</h4>
-                  <div className="space-y-2">
-                    {serviceHistory.slice(0, 2).map((service: any) => (
-                      <div key={service.id} className="flex items-center justify-between text-xs bg-gray-50 p-2 rounded">
-                        <span>{service.type}</span>
-                        <span>{new Date(service.date).toLocaleDateString()}</span>
-                        <span className="font-medium">${service.amount}</span>
-                      </div>
-                    ))}
-                  </div>
+              </div>
+
+              <div className="flex items-center space-x-6 text-sm text-gray-600 mb-4">
+                <div className="flex items-center">
+                  <Mail className="h-4 w-4 mr-1" />
+                  {client.email}
                 </div>
+                <div className="flex items-center">
+                  <Phone className="h-4 w-4 mr-1" />
+                  {client.phone}
+                </div>
+                <div className="flex items-center">
+                  <Calendar className="h-4 w-4 mr-1" />
+                  Last Service: {lastService ? 
+                    `${lastService.type} - ${new Date(lastService.date).toLocaleDateString()} - $${lastService.amount} (${lastService.status})` 
+                    : "No services yet"
+                  }
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
                 <div className="flex space-x-2">
-                  <Button variant="outline" size="sm" className="flex-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+                    onClick={() => handleViewDetails(client)}
+                  >
                     View Details
                   </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
-                    Schedule Service
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                    onClick={() => handleScheduleInvoice(client)}
+                  >
+                    Schedule Invoice
                   </Button>
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  onClick={() => handleDeleteClient(client)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </Card>
           );
         })}
       </div>
+
+      <AddClientModal 
+        open={showAddModal} 
+        onOpenChange={setShowAddModal} 
+      />
+      
+      <ClientDetailsModal 
+        open={showDetailsModal} 
+        onOpenChange={setShowDetailsModal} 
+        client={selectedClient}
+      />
+
+      <DeleteClientModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        clientName={selectedClient?.name || ""}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 };
